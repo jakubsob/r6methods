@@ -1,0 +1,10 @@
+Name: Generate R6 methods
+Description: Generate R6 methods.
+Binding: make_methods_addin
+Interactive: false
+
+Name: Generate R6 methods gadget
+Description: Generate R6 methods.
+Binding: make_methods_addin_gadget
+Interactive: true
+

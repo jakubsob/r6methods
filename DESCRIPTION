@@ -1,0 +1,18 @@
+Package: r6methods
+Type: Package
+Title: Add Methods to R6 Class Definition
+Version: 0.1.0
+Authors@R: person("Jakub", "Sobolewski", email = "jakupsob@gmail.com", role = c("aut", "cre"))
+Description: Generate methods string to add to R6 class definition. Making setters and/or
+   getters for private and/or public fields.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: 
+    glue,
+    rstudioapi,
+    miniUI,
+    shiny
+Suggests:
+    R6
