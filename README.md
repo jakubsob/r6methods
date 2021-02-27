@@ -75,7 +75,7 @@ make_methods(Person, "private", "both")
 #> }
 ```
 
-Or we make only getters:
+Or only getters:
 
 ``` r
 make_methods(Person, "private", "get", add_roxygen = FALSE)
