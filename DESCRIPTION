@@ -13,6 +13,10 @@ Imports:
     glue,
     rstudioapi,
     miniUI,
-    shiny
+    shiny,
+    dplyr,
+    magrittr,
+    stringr,
+    tibble
 Suggests:
     R6
