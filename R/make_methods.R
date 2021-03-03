@@ -32,7 +32,7 @@ make_getter_method_str <- function(field, add_roxygen = TRUE) {
   }}")
 
   if (add_roxygen) {
-    return(glue("#' @description Getter for {field} \n {method_str}"))
+    return(glue("#' @description Getter for {field}\n{method_str}"))
   }
 
   method_str
@@ -47,7 +47,7 @@ make_setter_method_str <- function(field, add_roxygen = TRUE) {
   }}")
 
   if (add_roxygen) {
-    return(glue("#' @description Setter for {field} \n {method_str}"))
+    return(glue("#' @description Setter for {field}\n{method_str}"))
   }
 
   method_str
@@ -79,6 +79,10 @@ make_methods <- function(
 
   public_fields <- names(r6$public_fields)
   private_fields <- names(r6$private_fields)
+
+  if (length(c(public_fields, private_fields)) == 0) {
+    stop("Supplied R6 class has no fields")
+  }
 
   fields <- list(
     "both" = c(public_fields, private_fields),

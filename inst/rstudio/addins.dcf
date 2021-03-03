@@ -10,6 +10,6 @@ Interactive: true
 
 Name: Insert R6 methods
 Description: Insert R6 methods.
-Binding: insert_methods
+Binding: insert_methods_addin
 Interactive: false
 
