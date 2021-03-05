@@ -2,10 +2,18 @@
 #'
 #' @param content Character, content of the file or a string
 #' @param cursor_row Integer, row position of cursor
+#' @inheritParams make_methods
 #'
 #' @return Character, modified \code{content} with injected methods
 #'
-insert_methods <- function(content, cursor_row) {
+#' @importFrom stringr str_locate str_locate_all str_match
+insert_methods <- function(
+  content,
+  cursor_row,
+  field = c("both", "public", "private"),
+  method = c("both", "get", "set"),
+  add_roxygen = TRUE
+) {
 
   if (length(content) == 1) content <- strsplit(content, "\n")[[1]]
 
@@ -29,16 +37,20 @@ insert_methods <- function(content, cursor_row) {
   # Get end row of class definition
   end_row <- start_row + length(strsplit(class_content, "\n")[[1]]) - 1
 
+  if (cursor_row > end_row) {
+    stop("Place ursor inside R6 class definition")
+  }
+
   if (start_row == end_row) {
     stop("One-line class definitions are not supported")
   }
 
   # Get position of public list
-  public_list_start_pos <- stringr::str_locate(class_content, "public[ \t]+=[\t ]+list\\(")
+  public_list_start_pos <- str_locate(class_content, "public[ \t]+=[\t ]+list\\(")
   if (all(is.na(public_list_start_pos))) {
     # Find appearences of `list(` in class call not starting with `private`
     # Get the first one as `public` arguments comes before `private`
-    public_list_start_pos <- stringr::str_locate_all(
+    public_list_start_pos <- str_locate_all(
       class_content,
       "(?<!private[ \t\n]{0,200}=[ \t\n]{0,200})list\\("
     )[[1]][1, 1]
@@ -52,13 +64,13 @@ insert_methods <- function(content, cursor_row) {
   public_list_end_pos <- find_closing(after_public_list) + public_list_start_pos - 1
 
   public_list <- substr(class_content, public_list_start_pos, public_list_end_pos)
-  list_content_sep <- stringr::str_match(public_list, "list\\(([ \n\t]+)")[1, 2]
-  public_list_closing <- stringr::str_locate(public_list, "[ \n\t]+\\)$")[1, 1]
+  list_content_sep <- str_match(public_list, "list\\(([ \n\t]+)")[1, 2]
+  public_list_closing <- str_locate(public_list, "[ \n\t]+\\)$")[1, 1]
 
   # Make methods strings
   methods <- class_content %>%
     source_class() %>%
-    make_methods()
+    make_methods(field, method, add_roxygen)
 
   new_public_list <- paste0(
     substr(public_list, 1, public_list_closing - 1),
@@ -78,33 +90,19 @@ insert_methods <- function(content, cursor_row) {
   content_after <- content[min(length(content), end_row + 1):length(content)]
 
   new_class_split <- strsplit(new_class, "\n")[[1]]
+  # If the first line of content before class definition is the first line
+  # of class definition
   if (content_before[length(content_before)] == new_class_split[1]) content_before <- ""
+  # If the first line of content after class definition is the last line
+  # of class definition
   if (content_after[1] == new_class_split[length(new_class_split)]) content_after <- ""
+  # content_before[content_before == ""] <- " "
+  # content_after[content_after == ""] <- " "
 
   paste0(
-    paste(content_before, collapse = "\n"),
+    paste0(content_before, sep = "\n", collapse = ""),
     new_class,
-    paste(content_after, collapse = "\n"),
+    paste0(content_after, sep = "\n", collapse = ""),
     collapse = "\n"
   )
 }
-
-
-#' An addin for inserting methods straigth into the source file
-#'
-#' @export
-#'
-insert_methods_addin <- function() {
-
-  context <- rstudioapi::getActiveDocumentContext()
-
-  # Obtain content of the file
-  content <- context$content
-  # Obtain row at which the cursor is positioned
-  cursor_row <- context$selection[[1]]$range$start[1]
-
-  new_content <- insert_methods(content, cursor_row)
-
-  rstudioapi::setDocumentContents(new_content)
-}
-

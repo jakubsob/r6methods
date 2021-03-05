@@ -13,3 +13,8 @@ Description: Insert R6 methods.
 Binding: insert_methods_addin
 Interactive: false
 
+Name: Insert R6 methods gadget
+Description: Insert R6 methods.
+Binding: insert_methods_addin_gadget
+Interactive: true
+

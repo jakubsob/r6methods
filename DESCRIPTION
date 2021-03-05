@@ -16,8 +16,7 @@ Imports:
     shiny,
     dplyr,
     magrittr,
-    stringr,
-    tibble
+    stringr
 Suggests:
     R6,
     testthat (>= 3.0.0)

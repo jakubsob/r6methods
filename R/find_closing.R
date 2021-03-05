@@ -10,16 +10,15 @@
 #'
 #' @importFrom magrittr %>%
 #' @importFrom stringr str_locate_all
-#' @importFrom tibble as_tibble
 #' @importFrom dplyr mutate select arrange filter pull bind_rows
 find_closing <- function(text, opening = "\\(", closing = "\\)") {
   # Get all parathenses starting from public list
   parathenses <- dplyr::bind_rows(
     stringr::str_locate_all(text, "\\(")[[1]] %>%
-      as_tibble() %>%
+      as.data.frame() %>%
       dplyr::mutate(type = "1"),
     stringr::str_locate_all(text, "\\)")[[1]] %>%
-      as_tibble() %>%
+      as.data.frame() %>%
       dplyr::mutate(type = "-1")
   ) %>%
     dplyr::select(-end) %>%

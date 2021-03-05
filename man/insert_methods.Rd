@@ -4,12 +4,25 @@
 \alias{insert_methods}
 \title{Insert Methods}
 \usage{
-insert_methods(content, cursor_row)
+insert_methods(
+  content,
+  cursor_row,
+  field = c("both", "public", "private"),
+  method = c("both", "get", "set"),
+  add_roxygen = TRUE
+)
 }
 \arguments{
 \item{content}{Character, content of the file or a string}
 
 \item{cursor_row}{Integer, row position of cursor}
+
+\item{field}{Character, fields for which to create method. May be "both",
+"public", "private" or name of class field. Multiple values allowed.}
+
+\item{method}{Character, methods to create. One of "both", "get", "set"}
+
+\item{add_roxygen}{Logical, whether to add roxygen description of method}
 }
 \value{
 Character, modified \code{content} with injected methods
