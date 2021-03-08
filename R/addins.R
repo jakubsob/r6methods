@@ -1,48 +1,101 @@
+#' Get Cursor Position From Active Document
+#'
+#' @param x Document Context
+#'
+#' @return Integer, position of cursor in text
+get_cursor_pos <- function(x) {
+  content <- x$contents
+  range <- x$selection[[1]]$range
+
+  start <- range$start
+  start_row <- range$start[1]
+  start_col <- range$start[2]
+
+  cont <- content
+  cont[cont == ""] <- " "
+  start_pos <- sum(nchar(cont[1:(start_row - 1)]))
+  start_pos <- start_pos + sum(nchar(substr(cont[start_row], 1 ,start_col)))
+}
+
 #' Make Methods Addin
 #'
 #' @export
+#' @importFrom magrittr %>%
 #' @importFrom rstudioapi getActiveDocumentContext
 make_methods_addin <- function() {
 
   x <- getActiveDocumentContext()
-  cursor_text <- x$selection[[1]]$text
+  pos <- get_cursor_pos(x)
 
-  r6 <- source_class(cursor_text)
-  cat(make_methods(r6))
+  x$contents %>%
+    paste0(collapse = "\n") %>%
+    extract_class(pos) %>%
+    source_class() %>%
+    make_methods() %>%
+    cat()
 }
 
 #' Make Methods Addin
 #'
 #' @export
 #'
+#' @importFrom magrittr %>%
 #' @importFrom miniUI miniPage gadgetTitleBar miniContentPanel
 #' @import shiny
 make_methods_addin_gadget <- function() {
 
   x <- getActiveDocumentContext()
-  cursor_text <- x$selection[[1]]$text
-  r6 <- source_class(cursor_text)
+  pos <- get_cursor_pos(x)
+  r6 <- x$contents %>%
+    paste0(collapse = "\n") %>%
+    extract_class(pos) %>%
+    source_class()
+
+  fields_choices <- c("both", "private", "public")
+  methods_choices <- c("both", "get", "set")
 
   ui <- miniPage(
-
-    gadgetTitleBar("Add R6 Methods"),
+    gadgetTitleBar("Insert R6 Methods"),
     miniContentPanel(
-      "Select fields to make methods for",
-      hr(),
-      checkboxGroupInput(
-        "fields",
-        label = NULL,
-        choices = c("both", "private", "public"),
-        selected = "both"
-      ),
-      checkboxInput("roxygen", "Add roxygen docs?")
+      fillPage(
+        fillRow(
+          height = "50px",
+          checkboxGroupInput(
+            "fields",
+            inline = TRUE,
+            label = "Fields",
+            choices = fields_choices,
+            selected = "both"
+          )
+        ),
+        fillRow(
+          height = "50px",
+          checkboxGroupInput(
+            "methods",
+            inline = TRUE,
+            label = "Methods",
+            choices = methods_choices,
+            selected = "both"
+          )
+        ),
+        fillRow(
+          height = "50px",
+          checkboxInput("roxygen", "Add roxygen docs?")
+        )
+      )
     )
   )
 
   server <- function(input, output, session) {
 
     observeEvent(input$done, {
-      cat(make_methods(r6, field = input$fields[1], add_roxygen = input$roxygen))
+      methods <- make_methods(
+        r6,
+        input$fields,
+        input$methods,
+        input$roxygen
+      )
+      cat(methods)
       invisible(stopApp())
     })
 
@@ -60,18 +113,17 @@ make_methods_addin_gadget <- function() {
 #'
 #' @export
 #'
+#' @importFrom magrittr %>%
+#' @importFrom rstudioapi getActiveDocumentContext setDocumentContents
 insert_methods_addin <- function() {
 
-  context <- rstudioapi::getActiveDocumentContext()
+  x <- getActiveDocumentContext()
+  pos <- get_cursor_pos(x)
 
-  # Obtain content of the file
-  content <- context$content
-  # Obtain row at which the cursor is positioned
-  cursor_row <- context$selection[[1]]$range$start[1]
-
-  new_content <- insert_methods(content, cursor_row)
-
-  rstudioapi::setDocumentContents(new_content)
+  x$contents %>%
+    paste0(collapse = "\n") %>%
+    insert_methods(pos) %>%
+    setDocumentContents()
 }
 
 #' Insert Methods Addin
@@ -80,40 +132,48 @@ insert_methods_addin <- function() {
 #'
 #' @import miniUI
 #' @import shiny
+#' @importFrom magrittr %>%
+#' @importFrom rstudioapi getActiveDocumentContext setDocumentContents
 insert_methods_addin_gadget <- function() {
 
-  context <- getActiveDocumentContext()
-  content <- context$content
-  cursor_row <- context$selection[[1]]$range$start[1]
+  x <- getActiveDocumentContext()
+  pos <- get_cursor_pos(x)
+  r6 <- x$contents %>%
+    paste0(collapse = "\n") %>%
+    extract_class(pos) %>%
+    source_class()
+
+  fields <- c(
+    "all", "private", "public",
+    names(r6$private_fields),
+    names(r6$public_fields)
+  )
+  methods <- c("both", "set", "get")
 
   ui <- miniPage(
-
-    gadgetTitleBar("Add R6 Methods"),
+    gadgetTitleBar("Insert R6 Methods"),
     miniContentPanel(
-      "Select fields to make methods for",
-      hr(),
       fillPage(
         fillRow(
-          fillCol(
-            checkboxGroupInput(
-              "fields",
-              label = NULL,
-              choices = c("both", "private", "public"),
-              selected = "both"
-            )
-          ),
-          fillRow(
-            checkboxGroupInput(
-              "methods",
-              label = NULL,
-              choices = c("both", "get", "set"),
-              selected = "both"
-            )
+          height = "50px",
+          checkboxInput(
+            "add_roxygen",
+            "Add roxygen docs",
+            TRUE
           )
         ),
-        fillRow(
-          checkboxInput("roxygen", "Add roxygen docs?")
-        )
+        lapply(fields, function(f) {
+          fillRow(
+            height = "50px",
+            checkboxGroupInput(
+              f,
+              inline = TRUE,
+              label = f,
+              choices = methods,
+              selected = if (f == "all") "both" else NULL
+            )
+          )
+        })
       )
     )
   )
@@ -121,14 +181,24 @@ insert_methods_addin_gadget <- function() {
   server <- function(input, output, session) {
 
     observeEvent(input$done, {
-      new_content <- insert_methods(
-        content,
-        cursor_row,
-        input$fields,
-        input$methods,
-        input$roxygen
-      )
-      rstudioapi::setDocumentContents(new_content)
+
+      content <- paste0(x$contents, collapse = "\n")
+      print(input[[fields[2]]])
+
+      purrr::walk(fields, function(f) {
+        method <- input[[f]]
+        if (is.null(method)) return()
+
+        content <<- insert_methods(
+          content,
+          pos,
+          field = f,
+          method = method,
+          add_roxygen = input$add_roxygen
+        )
+      })
+
+      setDocumentContents(content)
       invisible(stopApp())
     })
 
@@ -137,6 +207,6 @@ insert_methods_addin_gadget <- function() {
     })
   }
 
-  viewer <- dialogViewer("Make R6 Methods", width = 100, height = 200)
+  viewer <- dialogViewer("Insert R6 Methods", width = 300, height = 200)
   runGadget(ui, server, viewer = viewer)
 }

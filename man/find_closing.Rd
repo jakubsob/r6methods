@@ -14,7 +14,7 @@ find_closing(text, opening = "\\\\(", closing = "\\\\)")
 \item{closing}{Closing character}
 }
 \value{
-Integer
+Integer, position of closing character
 }
 \description{
 Find position of closing character to first encountered opening character

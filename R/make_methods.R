@@ -1,22 +1,7 @@
-#' Source class
-#'
-#' Sources R6 class from text, prepends namespace to `R6Class` in order to not
-#' require `R6` to be loaded.
-#'
-#' @param txt Character, text containing class definition
-#'
-#' @return R6 class
-source_class <- function(txt) {
-  if (!any(grepl("R6Class", txt))) stop("Text doesn't contain R6 class")
-  txt <- gsub("(?<!R6::)R6Class", "R6::R6Class", txt, perl = TRUE)
-  envir <- new.env()
-  eval(parse(text = txt), envir = envir)
-  get(ls(envir)[1], envir = envir)
-}
-
 #' Make method string
 #'
 #' @param field Character name of class field
+#' @param is_public Logical, whether the field is in public list
 #' @param add_roxygen Logical, whether to add roxygen description of method
 #'
 #' @return Character
@@ -24,12 +9,18 @@ source_class <- function(txt) {
 #' @rdname make_method_str
 #'
 #' @importFrom glue glue
-make_getter_method_str <- function(field, add_roxygen = TRUE) {
+make_getter_method_str <- function(field, is_public = TRUE, add_roxygen = TRUE) {
   if (is.null(field)) return(NULL)
 
-  method_str <- glue("get_{field} = function() {{
-    self${field}
-  }}")
+  if (is_public) {
+    method_str <- glue("get_{field} = function() {{
+      self${field}
+    }}")
+  } else {
+    method_str <- glue("get_{field} = function() {{
+      private${field}
+    }}")
+  }
 
   if (add_roxygen) {
     return(glue("#' @description Getter for {field}\n{method_str}"))
@@ -39,12 +30,18 @@ make_getter_method_str <- function(field, add_roxygen = TRUE) {
 }
 
 #' @rdname make_method_str
-make_setter_method_str <- function(field, add_roxygen = TRUE) {
+make_setter_method_str <- function(field, is_public = TRUE, add_roxygen = TRUE) {
   if (is.null(field)) return(NULL)
 
-  method_str <- glue("set_{field} = function({field}) {{
-    self${field} <- {field}
-  }}")
+  if (is_public) {
+    method_str <- glue("set_{field} = function({field}) {{
+      self${field} <- {field}
+    }}")
+  } else {
+    method_str <- glue("set_{field} = function({field}) {{
+      private${field} <- {field}
+    }}")
+  }
 
   if (add_roxygen) {
     return(glue("#' @description Setter for {field}\n{method_str}"))
@@ -56,7 +53,7 @@ make_setter_method_str <- function(field, add_roxygen = TRUE) {
 #' Make methods
 #'
 #' @param r6 R6 class for which to create methods
-#' @param field Character, fields for which to create method. May be "both",
+#' @param field Character, fields for which to create method. May be "all",
 #'   "public", "private" or name of class field. Multiple values allowed.
 #' @param method Character, methods to create. One of "both", "get", "set"
 #' @param add_roxygen Logical, whether to add roxygen description of method
@@ -65,9 +62,10 @@ make_setter_method_str <- function(field, add_roxygen = TRUE) {
 #' @export
 #'
 #' @importFrom glue glue_collapse
+#' @importFrom purrr map imap
 make_methods <- function(
   r6,
-  field = c("both", "public", "private", names(r6$public_fields), names(r6$private_fields)),
+  field = c("all", "public", "private", names(r6$public_fields), names(r6$private_fields)),
   method = c("both", "get", "set"),
   add_roxygen = TRUE
 ) {
@@ -77,6 +75,7 @@ make_methods <- function(
 
   method <- method[1]
 
+  public_methods <- names(r6$public_methods)
   public_fields <- names(r6$public_fields)
   private_fields <- names(r6$private_fields)
 
@@ -85,26 +84,27 @@ make_methods <- function(
   }
 
   fields <- list(
-    "both" = c(public_fields, private_fields),
+    "all" = c(public_fields, private_fields),
     "public" = public_fields,
     "private" = private_fields
   )
 
   methods <- list(
-    "both" = list(make_setter_method_str, make_getter_method_str),
-    "get" = list(make_getter_method_str),
-    "set" = list(make_setter_method_str)
+    "both" = list("set" = make_setter_method_str, "get" = make_getter_method_str),
+    "get" = list("get" = make_getter_method_str),
+    "set" = list("set" = make_setter_method_str)
   )
 
   # Get names of fields and make sure they aren't repeated
   fields <- fields[field]
   fields <- fields[!is.null(fields)]
   fields <- unique(unlist(fields, use.names = FALSE))
-  fields <- c(fields, field[!field %in% fields & !field %in% c("both", "public", "private")])
+  fields <- c(fields, field[!field %in% fields & !field %in% c("all", "public", "private")])
 
-  methods_str <- lapply(fields, function(f) {
-    lapply(methods[[method]], function(m) {
-      m(f, add_roxygen)
+  methods_str <- map(fields, function(f) {
+    imap(methods[[method]], function(m, n) {
+      if (glue("{n}_{f}") %in% public_methods) return(NULL)
+      m(f, f %in% public_fields, add_roxygen)
     })
   })
 

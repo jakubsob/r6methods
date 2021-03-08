@@ -21,17 +21,19 @@ knitr::opts_chunk$set(
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
-Generate boilerplate code for R6 classes. Given R6 class create getters and/or setters for selected class fields. 
+Generate boilerplate code for R6 classes. Given R6 class create getters and/or setters for selected class fields or use RStudio addins to insert methods straight into class definition.
 
 ## Installation
+
+You can install development version from Github using:
 
 ``` r
 remotes::install_github("jakubsob/r6methods")
 ```
 
-## Examples 
+## Basic usage
 
-Given an example R6 class we can easily create methods to put into class definition.
+Core functionality comes with `make_methods` function.
 
 ```{r}
 library(r6methods)
@@ -75,16 +77,17 @@ make_methods(Person, "private", "get", add_roxygen = FALSE)
 You can also create methods for fields of your liking, not only all of private/public:
 
 ```{r}
-make_methods(Person, "age", "both")
+make_methods(Person, c("age", "secret1"), "get", add_roxygen = FALSE)
 ```
 
-Two addins are also supplied:
+## RStudio addins
 
-  - Generate R6 methods: creates both getters and setters for all fields
-  - Generate R6 methods gadget: gives you control over which methods are generated
+Four addins are supplied with the package. They are grouped into 2 families:
+
+  - Generate: makes method strings and prints them to console to be copied to class definition. 
+  - Insert: makes method strings and inserts them into class definition.
   
-To use the addin you have to select whole class definition.
-
+Addins with `gadget` suffix open gadget in RStudio which allows user to have more control over the generated methods.
 
 
 

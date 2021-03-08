@@ -6,7 +6,7 @@
 \usage{
 make_methods(
   r6,
-  field = c("both", "public", "private", names(r6$public_fields),
+  field = c("all", "public", "private", names(r6$public_fields),
     names(r6$private_fields)),
   method = c("both", "get", "set"),
   add_roxygen = TRUE
@@ -15,7 +15,7 @@ make_methods(
 \arguments{
 \item{r6}{R6 class for which to create methods}
 
-\item{field}{Character, fields for which to create method. May be "both",
+\item{field}{Character, fields for which to create method. May be "all",
 "public", "private" or name of class field. Multiple values allowed.}
 
 \item{method}{Character, methods to create. One of "both", "get", "set"}

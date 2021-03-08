@@ -5,12 +5,14 @@
 \alias{make_setter_method_str}
 \title{Make method string}
 \usage{
-make_getter_method_str(field, add_roxygen = TRUE)
+make_getter_method_str(field, is_public = TRUE, add_roxygen = TRUE)
 
-make_setter_method_str(field, add_roxygen = TRUE)
+make_setter_method_str(field, is_public = TRUE, add_roxygen = TRUE)
 }
 \arguments{
 \item{field}{Character name of class field}
+
+\item{is_public}{Logical, whether the field is in public list}
 
 \item{add_roxygen}{Logical, whether to add roxygen description of method}
 }

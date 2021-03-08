@@ -13,18 +13,20 @@ MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.or
 <!-- badges: end -->
 
 Generate boilerplate code for R6 classes. Given R6 class create getters
-and/or setters for selected class fields.
+and/or setters for selected class fields or use RStudio addins to insert
+methods straight into class definition.
 
 ## Installation
+
+You can install development version from Github using:
 
 ``` r
 remotes::install_github("jakubsob/r6methods")
 ```
 
-## Examples
+## Basic usage
 
-Given an example R6 class we can easily create methods to put into class
-definition.
+Core functionality comes with `make_methods` function.
 
 ``` r
 library(r6methods)
@@ -57,21 +59,21 @@ Create getters and setters for private fields:
 
 ``` r
 make_methods(Person, "private", "both")
-#> #' @description Setter for secret1 
+#> #' @description Setter for secret1
 #> set_secret1 = function(secret1) {
-#>   self$secret1 <- secret1
+#>   private$secret1 <- secret1
 #> },
-#> #' @description Getter for secret1 
+#> #' @description Getter for secret1
 #> get_secret1 = function() {
-#>   self$secret1
+#>   private$secret1
 #> },
-#> #' @description Setter for secret2 
+#> #' @description Setter for secret2
 #> set_secret2 = function(secret2) {
-#>   self$secret2 <- secret2
+#>   private$secret2 <- secret2
 #> },
-#> #' @description Getter for secret2 
+#> #' @description Getter for secret2
 #> get_secret2 = function() {
-#>   self$secret2
+#>   private$secret2
 #> }
 ```
 
@@ -80,10 +82,10 @@ Or only getters:
 ``` r
 make_methods(Person, "private", "get", add_roxygen = FALSE)
 #> get_secret1 = function() {
-#>   self$secret1
+#>   private$secret1
 #> },
 #> get_secret2 = function() {
-#>   self$secret2
+#>   private$secret2
 #> }
 ```
 
@@ -91,21 +93,23 @@ You can also create methods for fields of your liking, not only all of
 private/public:
 
 ``` r
-make_methods(Person, "age", "both")
-#> #' @description Setter for age 
-#> set_age = function(age) {
-#>   self$age <- age
-#> },
-#> #' @description Getter for age 
+make_methods(Person, c("age", "secret1"), "get", add_roxygen = FALSE)
 #> get_age = function() {
 #>   self$age
+#> },
+#> get_secret1 = function() {
+#>   private$secret1
 #> }
 ```
 
-Two addins are also supplied:
+## RStudio addins
 
--   Generate R6 methods: creates both getters and setters for all fields
--   Generate R6 methods gadget: gives you control over which methods are
-    generated
+Four addins are supplied with the package. They are grouped into 2
+families:
 
-To use the addin you have to select whole class definition.
+  - Generate: makes method strings and prints them to console to be
+    copied to class definition.
+  - Insert: makes method strings and inserts them into class definition.
+
+Addins with `gadget` suffix open gadget in RStudio which allows user to
+have more control over the generated methods.

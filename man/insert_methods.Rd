@@ -6,8 +6,8 @@
 \usage{
 insert_methods(
   content,
-  cursor_row,
-  field = c("both", "public", "private"),
+  start_pos = 1,
+  field = c("all", "public", "private"),
   method = c("both", "get", "set"),
   add_roxygen = TRUE
 )
@@ -15,9 +15,10 @@ insert_methods(
 \arguments{
 \item{content}{Character, content of the file or a string}
 
-\item{cursor_row}{Integer, row position of cursor}
+\item{start_pos}{Integer, position of cursor within `content`. Number of characters
+before the cursor.}
 
-\item{field}{Character, fields for which to create method. May be "both",
+\item{field}{Character, fields for which to create method. May be "all",
 "public", "private" or name of class field. Multiple values allowed.}
 
 \item{method}{Character, methods to create. One of "both", "get", "set"}

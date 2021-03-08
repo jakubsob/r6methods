@@ -1,7 +1,68 @@
+#' Source class
+#'
+#' Sources R6 class from text, prepends namespace to `R6Class` in order to not
+#' require `R6` to be loaded.
+#'
+#' @param txt Character, text containing class definition
+#'
+#' @return R6 class
+source_class <- function(txt) {
+  if (!any(grepl("R6Class", txt))) stop("Text doesn't contain R6 class")
+  txt <- gsub("(?<!R6::)R6Class", "R6::R6Class", txt, perl = TRUE)
+  envir <- new.env()
+  eval(parse(text = txt), envir = envir)
+  get(ls(envir)[1], envir = envir)
+}
+
+#' Extract R6 Class
+#'
+#' @param content Character, content of a file or a string
+#' @param start_pos Integer, row position of cursor. Serves as starting point to search
+#'   for class definition
+#'
+#' @return A list with fields
+#' \itemize{
+#'   \item{class_content}{Character, extracted class definition}
+#'   \item{start}{Integer, start position of class definition within `content`}
+#'   \item{end}{Integer, end position of class definition within `content`}
+#' }
+#'
+#' @importFrom stringr str_locate_all
+#' @importFrom dplyr filter
+#' @importFrom purrr map_int
+extract_class <- function(content, start_pos = 1) {
+  # Find R6 class calls
+  calls <- str_locate_all(
+    content,
+    "\\w+\\s+(<-|=)\\s+R6::R6Class\\(|\\w+\\s+(<-|=)\\s+R6Class\\("
+  )[[1]]
+
+  selected_call <- calls %>%
+    as.data.frame() %>%
+    mutate(end = map_int(start, ~ start + find_closing(substr(content, .x, nchar(content))))) %>%
+    filter(start_pos >= start & start_pos <= end)
+
+  if (nrow(selected_call) != 1) {
+    stop("Cursor is not inside R6 class definition")
+  }
+
+  # Get substring up to closing parathensis of class call
+  start <- selected_call$start
+  end <- selected_call$end
+  class_content <- substr(content, start, end)
+
+  list(
+    class_content = class_content,
+    start = start,
+    end = end
+  )
+}
+
 #' Insert Methods
 #'
 #' @param content Character, content of the file or a string
-#' @param cursor_row Integer, row position of cursor
+#' @param start_pos Integer, position of cursor within `content`. Number of characters
+#'   before the cursor.
 #' @inheritParams make_methods
 #'
 #' @return Character, modified \code{content} with injected methods
@@ -9,47 +70,20 @@
 #' @importFrom stringr str_locate str_locate_all str_match
 insert_methods <- function(
   content,
-  cursor_row,
-  field = c("both", "public", "private"),
+  start_pos = 1,
+  field = c("all", "public", "private"),
   method = c("both", "get", "set"),
   add_roxygen = TRUE
 ) {
 
-  if (length(content) == 1) content <- strsplit(content, "\n")[[1]]
+  extracted_class <- extract_class(content, start_pos)
+  class_content <- extracted_class$class_content
 
-  # Find R6 class calls
-  start_row <- grep("R6Class\\(", content)
-  # Check whether cursor is placed after `R6Class` call by getting all
-  # calls that take place before the cursor
-  start_row <- start_row[start_row <= cursor_row]
-  if (length(start_row) == 0) {
-    stop("Place cursor inside R6 class definition")
-  }
-  # Get the nearest one
-  start_row <- start_row[length(start_row)]
-
-  # Get text that is after selected class definition
-  class_content <- content[start_row:length(content)]
-  class_content <- paste(class_content, collapse = "\n")
-  # Get substring up to closing parathensis of class call
-  class_content <- substr(class_content, 1, find_closing(class_content))
-
-  # Get end row of class definition
-  end_row <- start_row + length(strsplit(class_content, "\n")[[1]]) - 1
-
-  if (cursor_row > end_row) {
-    stop("Place ursor inside R6 class definition")
-  }
-
-  if (start_row == end_row) {
-    stop("One-line class definitions are not supported")
-  }
-
-  # Get position of public list
+  # Get start position of public list within class definition
   public_list_start_pos <- str_locate(class_content, "public[ \t]+=[\t ]+list\\(")
   if (all(is.na(public_list_start_pos))) {
     # Find appearences of `list(` in class call not starting with `private`
-    # Get the first one as `public` arguments comes before `private`
+    # Get the first one as `public` argument comes before `private`
     public_list_start_pos <- str_locate_all(
       class_content,
       "(?<!private[ \t\n]{0,200}=[ \t\n]{0,200})list\\("
@@ -60,9 +94,9 @@ insert_methods <- function(
     stop("No public list found in R6 class call")
   }
 
+  # Extract public list from class definition and get content before and after the list
   after_public_list <- substr(class_content, public_list_start_pos, nchar(class_content))
   public_list_end_pos <- find_closing(after_public_list) + public_list_start_pos - 1
-
   public_list <- substr(class_content, public_list_start_pos, public_list_end_pos)
   list_content_sep <- str_match(public_list, "list\\(([ \n\t]+)")[1, 2]
   public_list_closing <- str_locate(public_list, "[ \n\t]+\\)$")[1, 1]
@@ -85,24 +119,9 @@ insert_methods <- function(
     substr(class_content, public_list_end_pos + 1, nchar(class_content))
   )
 
-  # Recreate file content containing new class
-  content_before <- content[1:max(1, start_row - 1)]
-  content_after <- content[min(length(content), end_row + 1):length(content)]
-
-  new_class_split <- strsplit(new_class, "\n")[[1]]
-  # If the first line of content before class definition is the first line
-  # of class definition
-  if (content_before[length(content_before)] == new_class_split[1]) content_before <- ""
-  # If the first line of content after class definition is the last line
-  # of class definition
-  if (content_after[1] == new_class_split[length(new_class_split)]) content_after <- ""
-  # content_before[content_before == ""] <- " "
-  # content_after[content_after == ""] <- " "
-
   paste0(
-    paste0(content_before, sep = "\n", collapse = ""),
+    substr(content, 0, max(extracted_class$start - 1, 0)),
     new_class,
-    paste0(content_after, sep = "\n", collapse = ""),
-    collapse = "\n"
+    substr(content, extracted_class$end + 1, nchar(content))
   )
 }
