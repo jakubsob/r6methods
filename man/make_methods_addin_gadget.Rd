@@ -2,10 +2,10 @@
 % Please edit documentation in R/addins.R
 \name{make_methods_addin_gadget}
 \alias{make_methods_addin_gadget}
-\title{Make Methods Addin}
+\title{Make methods addin gadget}
 \usage{
 make_methods_addin_gadget()
 }
 \description{
-Make Methods Addin
+Make methods addin gadget
 }

@@ -4,10 +4,10 @@
 \alias{get_cursor_pos}
 \title{Get Cursor Position From Active Document}
 \usage{
-get_cursor_pos(x)
+get_cursor_pos(context)
 }
 \arguments{
-\item{x}{Document Context}
+\item{context}{Active document context}
 }
 \value{
 Integer, position of cursor in text

@@ -71,9 +71,9 @@ make_methods <- function(
 ) {
 
   match.arg(field, several.ok = TRUE)
-  match.arg(method)
+  match.arg(method, several.ok = TRUE)
 
-  method <- method[1]
+  # method <- method[1]
 
   public_methods <- names(r6$public_methods)
   public_fields <- names(r6$public_fields)
@@ -90,10 +90,11 @@ make_methods <- function(
   )
 
   methods <- list(
-    "both" = list("set" = make_setter_method_str, "get" = make_getter_method_str),
-    "get" = list("get" = make_getter_method_str),
-    "set" = list("set" = make_setter_method_str)
+    "set" = make_setter_method_str,
+    "get" = make_getter_method_str
   )
+
+  if ("both" %in% method) method <- c("set", "get")
 
   # Get names of fields and make sure they aren't repeated
   fields <- fields[field]
@@ -102,7 +103,7 @@ make_methods <- function(
   fields <- c(fields, field[!field %in% fields & !field %in% c("all", "public", "private")])
 
   methods_str <- map(fields, function(f) {
-    imap(methods[[method]], function(m, n) {
+    imap(methods[method], function(m, n) {
       if (glue("{n}_{f}") %in% public_methods) return(NULL)
       m(f, f %in% public_fields, add_roxygen)
     })
