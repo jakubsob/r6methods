@@ -28,3 +28,10 @@ Character containing generated methods to put into class definition
 \description{
 Make methods
 }
+\examples{
+Example <- R6::R6Class("Example", list(public_field = NULL), list(private_field = NULL))
+make_methods(Example)
+make_methods(Example, "private", "get")
+make_methods(Example, "private_field", c("get", "set"))
+make_methods(Example, "public_field", c("both"))
+}

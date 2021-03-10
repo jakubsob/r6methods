@@ -9,6 +9,14 @@
 #' @rdname make_method_str
 #'
 #' @importFrom glue glue
+#'
+#' @examples
+#' make_getter_method_str("name")
+#' make_setter_method_str("name")
+#' make_getter_method_str("name", FALSE, FALSE)
+NULL
+
+#' @rdname make_method_str
 make_getter_method_str <- function(field, is_public = TRUE, add_roxygen = TRUE) {
   if (is.null(field)) return(NULL)
 
@@ -63,6 +71,13 @@ make_setter_method_str <- function(field, is_public = TRUE, add_roxygen = TRUE) 
 #'
 #' @importFrom glue glue_collapse
 #' @importFrom purrr map imap
+#'
+#' @examples
+#' Example <- R6::R6Class("Example", list(public_field = NULL), list(private_field = NULL))
+#' make_methods(Example)
+#' make_methods(Example, "private", "get")
+#' make_methods(Example, "private_field", c("get", "set"))
+#' make_methods(Example, "public_field", c("both"))
 make_methods <- function(
   r6,
   field = c("all", "public", "private", names(r6$public_fields), names(r6$private_fields)),
