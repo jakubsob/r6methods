@@ -13,6 +13,9 @@ make_gadget(title, title_bar, done_fun)
 
 \item{done_fun}{Function to be used after clicking `Done` button}
 }
+\value{
+Function creating and running a Shiny gadget
+}
 \description{
 Create gadget for generating R6 methods. Action after clicking `Done` button is defined
 by `done_fun`.

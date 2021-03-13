@@ -6,6 +6,9 @@
 \usage{
 insert_methods_addin_gadget()
 }
+\value{
+No return value, called for side effects
+}
 \description{
 Insert methods addin gadget
 }

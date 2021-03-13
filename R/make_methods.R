@@ -4,16 +4,11 @@
 #' @param is_public Logical, whether the field is in public list
 #' @param add_roxygen Logical, whether to add roxygen description of method
 #'
-#' @return Character
-#'
-#' @rdname make_method_str
+#' @return Character containing method definition
 #'
 #' @importFrom glue glue
 #'
-#' @examples
-#' make_getter_method_str("name")
-#' make_setter_method_str("name")
-#' make_getter_method_str("name", FALSE, FALSE)
+#' @name make_method_str
 NULL
 
 #' @rdname make_method_str

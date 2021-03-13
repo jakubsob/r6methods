@@ -6,6 +6,9 @@
 \usage{
 make_methods_addin()
 }
+\value{
+No return value, called for side effects
+}
 \description{
 Make Methods Addin
 }

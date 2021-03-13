@@ -6,6 +6,9 @@
 \usage{
 insert_methods_addin()
 }
+\value{
+No return value, called for side effects
+}
 \description{
 An addin for inserting methods straigth into the source file
 }

@@ -11,6 +11,8 @@ get_cursor_pos <- function(context) {
 
 #' Make Methods Addin
 #'
+#' @return No return value, called for side effects
+#'
 #' @export
 #' @importFrom magrittr %>%
 make_methods_addin <- function() {
@@ -25,6 +27,8 @@ make_methods_addin <- function() {
 
 #' An addin for inserting methods straigth into the source file
 #'
+#' @return No return value, called for side effects
+#'
 #' @export
 #'
 #' @importFrom magrittr %>%
@@ -34,7 +38,7 @@ insert_methods_addin <- function() {
   context$contents %>%
     paste0(collapse = "\n") %>%
     insert_methods(get_cursor_pos(context)) %>%
-    setDocumentContents()
+    rstudioapi::setDocumentContents()
 }
 
 #' Make Gadget
@@ -46,6 +50,8 @@ insert_methods_addin <- function() {
 #' @param title_bar Character, gadget title bar
 #' @param done_fun Function to be used after clicking `Done` button
 #'
+#' @return Function creating and running a Shiny gadget
+#'
 #' @import shiny
 #' @importFrom magrittr %>%
 #' @importFrom miniUI miniPage gadgetTitleBar miniContentPanel
@@ -54,7 +60,7 @@ insert_methods_addin <- function() {
 make_gadget <- function(title, title_bar, done_fun) {
   function() {
 
-    context <- getActiveDocumentContext()
+    context <- rstudioapi::getActiveDocumentContext()
     content <- paste0(context$contents, collapse = "\n")
     pos <- get_cursor_pos(context)
     r6 <- content %>%
@@ -116,6 +122,8 @@ make_gadget <- function(title, title_bar, done_fun) {
 
 #' Make methods addin gadget
 #'
+#' @return No return value, called for side effects
+#'
 #' @export
 #' @importFrom purrr walk
 #' @importFrom glue glue_collapse
@@ -142,8 +150,11 @@ make_methods_addin_gadget <- make_gadget(
 
 #' Insert methods addin gadget
 #'
+#' @return No return value, called for side effects
+#'
 #' @export
 #' @importFrom purrr walk
+#' @importFrom rstudioapi setDocumentContents
 insert_methods_addin_gadget <- make_gadget(
   "R6 Methods",
   "Insert R6 Methods",
