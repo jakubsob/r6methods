@@ -8,6 +8,10 @@
 [![R-CMD-check](https://github.com/jakubsob/r6methods/workflows/R-CMD-check/badge.svg)](https://github.com/jakubsob/r6methods/actions)
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/r6methods)](https://cran.r-project.org/package=r6methods)
+[![CRAN\_time\_from\_release](https://www.r-pkg.org/badges/ago/r6methods)](https://cran.r-project.org/package=r6methods)
+[![metacran
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/r6methods)](https://cran.r-project.org/package=r6methods)
 <!-- badges: end -->
 
 Generate boilerplate code for R6 classes. Given R6 class create getters
@@ -16,7 +20,13 @@ methods straight into class definition.
 
 ## Installation
 
-You can install development version from Github using:
+You can install the package from CRAN:
+
+``` r
+install.packages("r6methods")
+```
+
+or install development version from Github using:
 
 ``` r
 remotes::install_github("jakubsob/r6methods")
