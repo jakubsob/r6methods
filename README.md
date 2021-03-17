@@ -12,6 +12,8 @@ MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.or
 [![CRAN\_time\_from\_release](https://www.r-pkg.org/badges/ago/r6methods)](https://cran.r-project.org/package=r6methods)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/r6methods)](https://cran.r-project.org/package=r6methods)
+[![Codecov test
+coverage](https://codecov.io/gh/jakubsob/r6methods/branch/master/graph/badge.svg)](https://codecov.io/gh/jakubsob/r6methods?branch=master)
 <!-- badges: end -->
 
 Generate boilerplate code for R6 classes. Given R6 class create getters

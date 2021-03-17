@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/r6methods)](https://cran.r-project.org/package=r6methods)
 [![CRAN_time_from_release](https://www.r-pkg.org/badges/ago/r6methods)](https://cran.r-project.org/package=r6methods)
 [![metacran downloads](https://cranlogs.r-pkg.org/badges/grand-total/r6methods)](https://cran.r-project.org/package=r6methods)
+[![Codecov test coverage](https://codecov.io/gh/jakubsob/r6methods/branch/master/graph/badge.svg)](https://codecov.io/gh/jakubsob/r6methods?branch=master)
 <!-- badges: end -->
 
 Generate boilerplate code for R6 classes. Given R6 class create getters and/or setters for selected class fields or use RStudio addins to insert methods straight into class definition.
