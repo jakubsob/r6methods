@@ -27,6 +27,6 @@ find_closing <- function(text, opening = "\\(", closing = "\\)") {
     arrange(start) %>%
     mutate(csum = cumsum(type))
 
-  # Get first matching closing bracket for public list opening
+  # Get first matching closing character
   filter(matches, csum == 0)$start[1]
 }
