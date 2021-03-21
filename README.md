@@ -123,3 +123,11 @@ families:
 
 Addins with `gadget` suffix open gadget in RStudio which allows user to
 have more control over the generated methods.
+
+**Insert R6 methods**
+
+![insert methods](man/figures/README-insert_methods.gif)
+
+**Insert R6 methods gadget**
+
+![insert methods gadget](man/figures/README-insert_methods_gadget.gif)
