@@ -1,15 +1,14 @@
 Package: r6methods
 Type: Package
 Title: Make Methods for R6 Classes
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Jakub", "Sobolewski", email = "jakupsob@gmail.com", role = c("aut", "cre"))
 Description: Generate boilerplate code for R6 classes. Given R6 class create getters 
     and/or setters for selected class fields or use RStudio addins to insert methods 
     straight into class definition.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports: 
     glue,
     rstudioapi,
@@ -20,6 +19,7 @@ Imports:
     stringr,
     purrr
 Suggests:
+    mockery,
     R6,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
